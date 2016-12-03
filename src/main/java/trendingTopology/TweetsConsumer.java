@@ -1,6 +1,5 @@
 package trendingTopology;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
@@ -16,37 +15,21 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+/**
+ * Spout that reads tweets from kafka and emits them to the topology
+ */
 public class TweetsConsumer extends BaseRichSpout{	
 
 	private static final long serialVersionUID = 1L;
 	private SpoutOutputCollector collector;
-	private static final ObjectMapper objectMapper = new ObjectMapper();
 	KafkaConsumer<String, String> kafkaConsumer;
 
 	@Override
 	public void nextTuple() {        
 		ConsumerRecords<String, String> records = kafkaConsumer.poll(10);
 		for (ConsumerRecord<String, String> record : records) {
-			
-			JsonNode root;
-			try {
-				root = objectMapper.readTree(record.value());
-				JsonNode hashtagsNode = root.path("entities").path("hashtags");
-				String language = record.key();
-				if (language != null && !hashtagsNode.toString().equals("[]")) {
-					for (JsonNode node : hashtagsNode) {
-						String hashtag = node.path("text").asText();
-					}
-					collector.emit("tweetsStream", new Values(new String(record.value())));
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			collector.emit("tweetsStream", new Values(new String(record.value())));
 		}
-
 	}
 
 	@Override
