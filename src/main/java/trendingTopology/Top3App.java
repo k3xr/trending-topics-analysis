@@ -24,6 +24,9 @@ public class Top3App {
 		builder.setBolt("hashtagCounter", new HashtagCounter(languages, topics))
 		.localOrShuffleGrouping("tweetsFilter", "hashtagStream");
 
+		builder.setBolt("saveOutput", new SaveOutput())
+		.localOrShuffleGrouping("hashtagCounter", "hashtagCountStream");
+
 		Config conf = new Config();
 
 		LocalCluster cluster = new LocalCluster();

@@ -20,6 +20,7 @@ public class HashtagCounter extends BaseRichBolt{
 	private HashMap<String, Integer>[] tweetCount;
 	private String[] topics;
 	private String[] languages;
+	private String windowId;
 
 	public HashtagCounter(String[] languages, String[] topics) {
 		super();
@@ -39,17 +40,12 @@ public class HashtagCounter extends BaseRichBolt{
 		for (int i= 0; i < languages.length; i++) {
 			if(languages[i].equals(language)){
 				if (topics[i].equals(hashtag)) {
-					// Start new window
-					System.out.println("Received " + hashtag + " lang " + language + " Starting new window");
+					windowId = timestamp;
 					Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
-					System.out.println("-------->Emitting window hashtags START");
 					while (it.hasNext()) {
 						Entry<String, Integer> pair = it.next();
-						System.out.println("Emitting " + languages[i] + " " + pair.getKey() + " " + pair.getValue());
-						collector.emit(new Values(languages[i], pair.getKey(), pair.getValue()));
-						//						it.remove(); // avoids a ConcurrentModificationException
+						collector.emit("hashtagCountStream", new Values(windowId, languages[i], pair.getKey(), pair.getValue()));
 					}
-					System.out.println("-------->Emitting window hashtags END");
 					tweetCount[i].clear();
 				} else {
 					int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
@@ -67,7 +63,7 @@ public class HashtagCounter extends BaseRichBolt{
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declareStream("hashtagCountStream", new Fields("language", "hashtag", "count"));
+		declarer.declareStream("hashtagCountStream", new Fields("windowId", "language", "hashtag", "count"));
 	}
 
 }
