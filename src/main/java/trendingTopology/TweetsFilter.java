@@ -50,8 +50,7 @@ public class TweetsFilter extends BaseRichBolt {
 			if (checkLang(language) && !hashtagsNode.toString().equals("[]")) {
 				for (JsonNode node : hashtagsNode) {
 					String hashtag = node.path("text").asText();
-					//					System.out.println("Emitting " + timestamp + " " + language + " " + hashtag);
-					collector.emit(new Values(timestamp, language, hashtag));
+					collector.emit("hashtagStream", new Values(timestamp, language, hashtag));
 				}				
 			}
 		} catch (IOException e) {

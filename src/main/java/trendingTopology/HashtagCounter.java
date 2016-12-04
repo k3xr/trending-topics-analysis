@@ -33,28 +33,27 @@ public class HashtagCounter extends BaseRichBolt{
 
 	@Override
 	public void execute(Tuple input) {
-		//		String timestamp = input.getString(0);
-		System.out.println("ASD");
+		String timestamp = input.getString(0);
 		String language = input.getString(1);
-		String hashtag = input.getString(3);
-		System.out.println("Saving hashtag " + hashtag + " language " + language);
+		String hashtag = input.getString(2);
 		for (int i= 0; i < languages.length; i++) {
 			if(languages[i].equals(language)){
 				if (topics[i].equals(hashtag)) {
 					// Start new window
+					System.out.println("Received " + hashtag + " lang " + language + " Starting new window");
 					Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
+					System.out.println("-------->Emitting window hashtags START");
 					while (it.hasNext()) {
 						Entry<String, Integer> pair = it.next();
-						System.out.println(pair.getKey() + " = " + pair.getValue());
-						collector.emit(new Values(languages[i], pair.getKey(), pair.getValue()));
 						System.out.println("Emitting " + languages[i] + " " + pair.getKey() + " " + pair.getValue());
-						it.remove(); // avoids a ConcurrentModificationException
+						collector.emit(new Values(languages[i], pair.getKey(), pair.getValue()));
+						//						it.remove(); // avoids a ConcurrentModificationException
 					}
+					System.out.println("-------->Emitting window hashtags END");
 					tweetCount[i].clear();
 				} else {
-					int oldCount = tweetCount[i].get(hashtag);
+					int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
 					tweetCount[i].put(hashtag, oldCount+1);
-					System.out.println("Saving hashtag " + hashtag + " value " + oldCount+1);
 				}
 				break;
 			}

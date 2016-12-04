@@ -3,7 +3,6 @@ package trendingTopology;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
 
 public class Top3App {
 
@@ -13,9 +12,8 @@ public class Top3App {
 		languages[0] = "en";
 		languages[1] = "es";
 		String[] topics = new String[2];
-		topics[0] = "fail";
-		topics[1] = "Messi";
-
+		topics[0] = "Travel";
+		topics[1] = "trombaMLG";
 
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout("tweetsConsumer", new TweetsConsumer());
@@ -27,7 +25,6 @@ public class Top3App {
 		.localOrShuffleGrouping("tweetsFilter", "hashtagStream");
 
 		Config conf = new Config();
-//		conf.setDebug(true);
 
 		LocalCluster cluster = new LocalCluster();
 		cluster.submitTopology("Top3App", conf, builder.createTopology());
