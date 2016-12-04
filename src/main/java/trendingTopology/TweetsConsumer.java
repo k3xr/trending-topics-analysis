@@ -22,7 +22,13 @@ public class TweetsConsumer extends BaseRichSpout{
 
 	private static final long serialVersionUID = 1L;
 	private SpoutOutputCollector collector;
-	KafkaConsumer<String, String> kafkaConsumer;
+	private KafkaConsumer<String, String> kafkaConsumer;
+	private String kafkaBrokerURL;
+	
+	public TweetsConsumer(String kafkaBrokerURL) {
+		super();
+		this.kafkaBrokerURL = kafkaBrokerURL;
+	}
 
 	@Override
 	public void nextTuple() {        
@@ -33,9 +39,9 @@ public class TweetsConsumer extends BaseRichSpout{
 	}
 
 	@Override
-	public void open(Map arg0, TopologyContext arg1, SpoutOutputCollector collector) {
+	public void open(Map arg0, TopologyContext context, SpoutOutputCollector collector) {
 		Properties props = new Properties();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokerURL);
 		props.put("group.id", "MYGROUP");
 		props.put("enable.auto.commit", "true");
 		props.put("auto.commit.interval.ms", "1000");

@@ -50,7 +50,7 @@ public class TweetsFilter extends BaseRichBolt {
 			if (checkLang(language) && !hashtagsNode.toString().equals("[]")) {
 				for (JsonNode node : hashtagsNode) {
 					String hashtag = node.path("text").asText();
-					collector.emit("hashtagStream", new Values(timestamp, language, hashtag));
+					collector.emit(new Values(timestamp, language, hashtag));
 				}				
 			}
 		} catch (IOException e) {
@@ -60,7 +60,7 @@ public class TweetsFilter extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declareStream("hashtagStream", new Fields("timestamp", "language", "hashtag"));
+		declarer.declare(new Fields("timestamp", "language", "hashtag"));
 	}
 
 	@Override

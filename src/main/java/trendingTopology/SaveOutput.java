@@ -14,20 +14,17 @@ import org.apache.storm.tuple.Tuple;
 public class SaveOutput extends BaseRichBolt{
 
 	private static final long serialVersionUID = 1L;
-	OutputCollector collector;
-	String windowId;
-	int[] top3Count;
-	String[] top3Hashtags;
-	ArrayList<Tuple> top3List;
-	int windowCounter;
+	private String windowId;
+	private ArrayList<Tuple> top3List;
+	private int windowCounter;
+	private String folder;
 
-	public SaveOutput() {
+	public SaveOutput(String folder) {
 		super();
-		this.top3Count = new int[3];
-		this.top3Hashtags = new String[3];
 		this.top3List = new ArrayList<Tuple>();
 		this.windowCounter = 1;
 		this.windowId = "";
+		this.folder = folder;
 	}
 
 	@Override
@@ -46,11 +43,11 @@ public class SaveOutput extends BaseRichBolt{
 					int valTuple2 = tuple2.getInteger(3);
 
 					if (valTuple1 > valTuple2) {
-						return 1;
+						return -1;
 					} else if(valTuple1 == valTuple2) {
 						return (tuple1.getString(2).compareTo(tuple2.getString(2)));
 					} else {
-						return -1;
+						return 1;
 					}
 				}
 			});
@@ -58,7 +55,7 @@ public class SaveOutput extends BaseRichBolt{
 			// get top 3 hashtags
 			String toPrint = windowCounter+"";
 			int top3Count = 0;
-			for (int i = 0; i<top3List.size() && top3Count < 4; i++) {
+			for (int i = 0; i < top3List.size() && top3Count < 3; i++) {
 				Tuple currentTuple = top3List.get(i);
 				if(currentTuple != null){
 					toPrint += "," + currentTuple.getString(2) + "," + currentTuple.getInteger(3);
@@ -75,8 +72,6 @@ public class SaveOutput extends BaseRichBolt{
 
 			// save them to file
 			System.out.println(toPrint);
-
-
 			top3List = new ArrayList<Tuple>(); 
 		}
 		windowId = newWindowId;
@@ -86,8 +81,7 @@ public class SaveOutput extends BaseRichBolt{
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		this.collector = collector;
-
+		// Nothing to prepare
 	}
 
 	@Override
