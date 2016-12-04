@@ -42,7 +42,7 @@ public class Top3App {
 		.fieldsGrouping("hashtagCounter", new Fields("windowId"));
 
 		Config conf = new Config();
-		conf.setMaxTaskParallelism(4);
+//		conf.setMaxTaskParallelism(4);
 
 		LocalCluster cluster = new LocalCluster();
 		cluster.submitTopology("Top3App", conf, builder.createTopology());

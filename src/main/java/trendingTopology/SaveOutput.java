@@ -1,5 +1,9 @@
 package trendingTopology;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,6 +76,18 @@ public class SaveOutput extends BaseRichBolt{
 
 			// save them to file
 			System.out.println(toPrint);
+			File file = new File(folder + "/" + top3List.get(0).getString(1) + "_" + 2);
+			BufferedWriter writer = null;
+
+			try {
+				writer = new BufferedWriter(new FileWriter(file, true));
+				writer.append(toPrint);
+				writer.newLine();
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 			top3List = new ArrayList<Tuple>(); 
 		}
 		windowId = newWindowId;

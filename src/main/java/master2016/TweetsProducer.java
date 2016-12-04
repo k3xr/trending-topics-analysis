@@ -1,5 +1,9 @@
 package master2016;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -20,7 +24,7 @@ public class TweetsProducer
 {
 	public final static String TOPIC_NAME = "Tweets";
 
-	public static void main(String[] args )
+	public static void main(String[] args)
 	{
 		if(args.length != 7){
 			System.out.println("Invalid arguments");
@@ -33,17 +37,16 @@ public class TweetsProducer
 		String tokenValue = args[3];
 		String tokenSecret = args[4];
 		String kafkaBrokerURL = args[5];
-		String filename = args[6];
+		String fileName = args[6];
 
 		Properties props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokerURL);
 		props.put("acks", "1");
 		props.put("retries", 3);
 		props.put("batch.size", 16384);
 		props.put("buffer.memory", 33554432);
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		props.put("metadata.broker.list", kafkaBrokerURL);
 
 		final KafkaProducer<String, String> prod = new KafkaProducer<String, String>(props);
 
@@ -67,6 +70,7 @@ public class TweetsProducer
 							String value = TwitterObjectFactory.getRawJSON(status);
 							String lang = status.getLang();
 							// One topic for all tweets
+							System.out.println(value);
 							prod.send(new ProducerRecord<String, String>(TweetsProducer.TOPIC_NAME, lang, value));
 						}						
 					}
@@ -86,6 +90,21 @@ public class TweetsProducer
 
 		} else if (mode.equals("1")) {
 			// Read tweets from file
+			BufferedReader reader = null;
+
+			try {
+				reader = new BufferedReader(new FileReader(fileName));
+				String tweetLine;
+				while ((tweetLine = reader.readLine()) != null) {
+					System.out.println(tweetLine);
+					prod.send(new ProducerRecord<String, String>(TweetsProducer.TOPIC_NAME, tweetLine));
+				}
+				reader.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 		} else {
 			System.out.println("Invalid arguments");
