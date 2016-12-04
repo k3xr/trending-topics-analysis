@@ -20,49 +20,71 @@ public class HashtagCounter extends BaseRichBolt{
 	private HashMap<String, Integer>[] tweetCount;
 	private String[] topics;
 	private String[] languages;
-	private String windowId;
+	private String[] windowId;
+	private boolean[] isWindowOpen;
 
-	public HashtagCounter(String[] languages, String[] topics) {
+	@SuppressWarnings("unchecked")
+	public HashtagCounter(String[] languages, String[] topics) 
+	{
 		super();
 		this.topics = topics;
 		this.languages = languages;
-		tweetCount = new HashMap[languages.length];
+		this.tweetCount = new HashMap[languages.length];
+		this.windowId = new String[languages.length];
+		this.isWindowOpen = new boolean[languages.length];
 		for (int i= 0; i < languages.length; i++) {
-			tweetCount[i] = new HashMap<String, Integer>();
+			this.tweetCount[i] = new HashMap<String, Integer>();
+			this.windowId[i] = "";
+			this.isWindowOpen[i] = false;
 		}
 	}
 
 	@Override
-	public void execute(Tuple input) {
+	public void execute(Tuple input) 
+	{
 		String timestamp = input.getString(0);
 		String language = input.getString(1);
 		String hashtag = input.getString(2);
 		for (int i= 0; i < languages.length; i++) {
-			if(languages[i].equals(language)){
+			if (languages[i].equals(language)) {
+				windowId[i] = timestamp;
 				if (topics[i].equals(hashtag)) {
-					windowId = timestamp;
-					Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
-					while (it.hasNext()) {
-						Entry<String, Integer> pair = it.next();
-						collector.emit(new Values(windowId, languages[i], pair.getKey(), pair.getValue()));
+					if (isWindowOpen[i]) {
+						// window ends
+						isWindowOpen[i] = false;
+						Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
+						while (it.hasNext()) {
+							Entry<String, Integer> pair = it.next();
+							collector.emit(new Values(windowId[i], languages[i], pair.getKey(), pair.getValue()));
+						}
+						collector.emit(new Values("", "", "", 0));
+						tweetCount[i].clear();
+					} else {
+						// window starts
+						isWindowOpen[i] = true;
 					}
-					tweetCount[i].clear();
+
 				} else {
-					int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
-					tweetCount[i].put(hashtag, oldCount+1);
+					if (isWindowOpen[i]) {
+						int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
+						tweetCount[i].put(hashtag, oldCount+1);
+					}				
 				}
 				break;
 			}
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) 
+	{
 		this.collector = collector;
 	}
 
 	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+	public void declareOutputFields(OutputFieldsDeclarer declarer) 
+	{
 		declarer.declare(new Fields("windowId", "language", "hashtag", "count"));
 	}
 

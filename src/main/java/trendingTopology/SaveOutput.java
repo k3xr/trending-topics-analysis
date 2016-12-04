@@ -23,7 +23,8 @@ public class SaveOutput extends BaseRichBolt{
 	private int windowCounter;
 	private String folder;
 
-	public SaveOutput(String folder) {
+	public SaveOutput(String folder)
+	{
 		super();
 		this.top3List = new ArrayList<Tuple>();
 		this.windowCounter = 1;
@@ -31,15 +32,28 @@ public class SaveOutput extends BaseRichBolt{
 		this.folder = folder;
 	}
 
-	@Override
-	public void execute(Tuple input) {
+	private void saveToFile(String lineToSave)
+	{
+		File file = new File(folder + "/" + top3List.get(0).getString(1) + "_" + 13);
+		BufferedWriter writer = null;
 
+		try {
+			writer = new BufferedWriter(new FileWriter(file, true));
+			writer.append(lineToSave);
+			writer.newLine();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void execute(Tuple input)
+	{
 		String newWindowId = input.getString(0);
 
-		if (!windowId.equals("") && !windowId.equals(newWindowId)) {
-			// new window
-
-			// order the collection
+		if (!windowId.equals("") && input.getInteger(3) == 0) {
+			// order the old collection
 			Collections.sort(top3List, new Comparator<Tuple>() {
 				@Override
 				public int compare(Tuple tuple1, Tuple tuple2) {
@@ -48,7 +62,7 @@ public class SaveOutput extends BaseRichBolt{
 
 					if (valTuple1 > valTuple2) {
 						return -1;
-					} else if(valTuple1 == valTuple2) {
+					} else if (valTuple1 == valTuple2) {
 						return (tuple1.getString(2).compareTo(tuple2.getString(2)));
 					} else {
 						return 1;
@@ -57,52 +71,42 @@ public class SaveOutput extends BaseRichBolt{
 			});
 
 			// get top 3 hashtags
-			String toPrint = windowCounter+"";
+			String toSave = windowCounter+"";
 			int top3Count = 0;
 			for (int i = 0; i < top3List.size() && top3Count < 3; i++) {
 				Tuple currentTuple = top3List.get(i);
-				if(currentTuple != null){
-					toPrint += "," + currentTuple.getString(2) + "," + currentTuple.getInteger(3);
+				if (currentTuple != null) {
+					toSave += "," + currentTuple.getString(2) + "," + currentTuple.getInteger(3);
 				} else {
-					toPrint += ",null,0";
+					toSave += ",null,0";
 				}
 				top3Count++;
 			}
 			while (top3Count < 3) {
-				toPrint += ",null,0";
+				toSave += ",null,0";
 				top3Count++;
 			}
 			windowCounter++;
 
 			// save them to file
-			System.out.println(toPrint);
-			File file = new File(folder + "/" + top3List.get(0).getString(1) + "_" + 2);
-			BufferedWriter writer = null;
-
-			try {
-				writer = new BufferedWriter(new FileWriter(file, true));
-				writer.append(toPrint);
-				writer.newLine();
-				writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			System.out.println(toSave);
+			saveToFile(toSave);
 
 			top3List = new ArrayList<Tuple>(); 
 		}
-		windowId = newWindowId;
-		top3List.add(input);
+		else {
+			windowId = newWindowId;
+			top3List.add(input);
+		}
+
 
 	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {}
 
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		// Nothing to prepare
-	}
-
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		// Nothing to declare
-	}
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {}
 
 }

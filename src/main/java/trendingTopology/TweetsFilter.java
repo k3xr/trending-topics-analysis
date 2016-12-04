@@ -24,14 +24,16 @@ public class TweetsFilter extends BaseRichBolt {
 	private OutputCollector collector;
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
-	public TweetsFilter(String[] languages) {
+	public TweetsFilter(String[] languages)
+	{
 		super();
 		this.languages = languages;
 	}
 
-	private boolean checkLang(String language){
+	private boolean checkLang(String language)
+	{
 		for (int i = 0; i < languages.length; i++) {
-			if(languages[i].equals(language)){
+			if (languages[i].equals(language)) {
 				return true;
 			}
 		}
@@ -39,8 +41,9 @@ public class TweetsFilter extends BaseRichBolt {
 	}
 
 	@Override
-	public void execute(Tuple input) {
-		String tweet = 	(String)input.getValueByField("tweet");
+	public void execute(Tuple input)
+	{
+		String tweet = (String)input.getValueByField("tweet");
 		JsonNode root;
 		try {
 			root = objectMapper.readTree(tweet);
@@ -59,12 +62,15 @@ public class TweetsFilter extends BaseRichBolt {
 	}
 
 	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+	public void declareOutputFields(OutputFieldsDeclarer declarer)
+	{
 		declarer.declare(new Fields("timestamp", "language", "hashtag"));
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector)
+	{
 		this.collector = collector;
 	}
 }

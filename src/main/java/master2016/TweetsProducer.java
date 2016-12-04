@@ -70,7 +70,6 @@ public class TweetsProducer
 							String value = TwitterObjectFactory.getRawJSON(status);
 							String lang = status.getLang();
 							// One topic for all tweets
-							System.out.println(value);
 							prod.send(new ProducerRecord<String, String>(TweetsProducer.TOPIC_NAME, lang, value));
 						}						
 					}
@@ -96,7 +95,6 @@ public class TweetsProducer
 				reader = new BufferedReader(new FileReader(fileName));
 				String tweetLine;
 				while ((tweetLine = reader.readLine()) != null) {
-					System.out.println(tweetLine);
 					prod.send(new ProducerRecord<String, String>(TweetsProducer.TOPIC_NAME, tweetLine));
 				}
 				reader.close();
