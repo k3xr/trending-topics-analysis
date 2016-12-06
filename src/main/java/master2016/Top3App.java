@@ -36,9 +36,9 @@ public class Top3App {
 		}
 
 		TopologyBuilder builder = new TopologyBuilder();
-		builder.setSpout("tweetsConsumer", new TweetsConsumer(kafkaBrokerURl));
+		builder.setSpout("tweetsConsumer", new TweetsConsumer(kafkaBrokerURl), 3);
 
-		builder.setBolt("tweetsFilter", new TweetsFilter(languages))
+		builder.setBolt("tweetsFilter", new TweetsFilter(languages), 3)
 		.localOrShuffleGrouping("tweetsConsumer", "tweetsStream");
 
 		builder.setBolt("hashtagCounter", new HashtagCounter(languages, topics))
