@@ -1,4 +1,4 @@
-package trendingTopology;
+package master2016;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +13,9 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
+/**
+ * Counts the occurrences of each hashtag inside each window for a language
+ */
 public class HashtagCounter extends BaseRichBolt{
 
 	private static final long serialVersionUID = 1L;
@@ -47,7 +50,6 @@ public class HashtagCounter extends BaseRichBolt{
 		String hashtag = input.getString(2);
 		for (int i= 0; i < languages.length; i++) {
 			if (languages[i].equals(language)) {
-				windowId[i] = timestamp;
 				if (topics[i].equals(hashtag)) {
 					if (isWindowOpen[i]) {
 						// window ends
@@ -57,18 +59,17 @@ public class HashtagCounter extends BaseRichBolt{
 							Entry<String, Integer> pair = it.next();
 							collector.emit(new Values(windowId[i], languages[i], pair.getKey(), pair.getValue()));
 						}
-						collector.emit(new Values("", "", "", 0));
+						collector.emit(new Values(windowId[i], "", "", 0));
 						tweetCount[i].clear();
 					} else {
 						// window starts
+						windowId[i] = timestamp;
 						isWindowOpen[i] = true;
 					}
 
-				} else {
-					if (isWindowOpen[i]) {
-						int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
-						tweetCount[i].put(hashtag, oldCount+1);
-					}				
+				} else if (isWindowOpen[i]) {
+					int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
+					tweetCount[i].put(hashtag, oldCount+1);		
 				}
 				break;
 			}

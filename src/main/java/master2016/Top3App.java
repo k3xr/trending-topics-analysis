@@ -1,10 +1,16 @@
-package trendingTopology;
+package master2016;
 
 import org.apache.storm.Config;
-import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.AlreadyAliveException;
+import org.apache.storm.generated.AuthorizationException;
+import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
+/**
+ * Creates the Storm topology
+ */
 public class Top3App {
 
 	public static void main(String[] args) 
@@ -42,10 +48,20 @@ public class Top3App {
 		.fieldsGrouping("hashtagCounter", new Fields("windowId"));
 
 		Config conf = new Config();
-		//		conf.setMaxTaskParallelism(4);
+		conf.setNumWorkers(3);
 
-		LocalCluster cluster = new LocalCluster();
-		cluster.submitTopology(topologyName, conf, builder.createTopology());
+		try {
+			StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
+		} catch (AlreadyAliveException e) {
+			e.printStackTrace();
+		} catch (InvalidTopologyException e) {
+			e.printStackTrace();
+		} catch (AuthorizationException e) {
+			e.printStackTrace();
+		}
+
+		//		LocalCluster cluster = new LocalCluster();
+		//		cluster.submitTopology(topologyName, conf, builder.createTopology());
 
 		//		Utils.sleep(10000);
 		//

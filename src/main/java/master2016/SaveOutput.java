@@ -1,4 +1,4 @@
-package trendingTopology;
+package master2016;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,6 +15,9 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
 
+/**
+ * Saves the top3 hashtags and the number of occurrences into a file
+ */
 public class SaveOutput extends BaseRichBolt{
 
 	private static final long serialVersionUID = 1L;

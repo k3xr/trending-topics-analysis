@@ -1,4 +1,4 @@
-package master2016;
+package producer;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -20,6 +20,11 @@ import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
+/**
+ * Stores tweets in kafka from twitter API or from file
+ * Must be called with 7 params:
+ * mode APIKey APISecret TokenValue TokenSecret KafkaBrokerURL Filename
+ */
 public class TweetsProducer 
 {
 	public final static String TOPIC_NAME = "Tweets";
@@ -52,7 +57,7 @@ public class TweetsProducer
 
 		if (mode.equals("2")){
 			try {
-				// Initialize twitter stream
+				// Initialize twitter stream from API
 				ConfigurationBuilder cb = new ConfigurationBuilder();
 				cb.setJSONStoreEnabled(true);
 				cb.setIncludeEntitiesEnabled(true);

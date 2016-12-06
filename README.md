@@ -26,3 +26,30 @@ bin/kafka-topics.sh --list --zookeeper localhost:2181
 start consumer (standard output):
 
 bin/kafka-console-consumer.sh -bootstrap-server localhost:9092 --topic Tweets --from-beginning
+
+Start storm zookeeper
+
+bin/zkServer.sh start stormZk.cfg
+
+Connect to zookeeper Cli
+
+bin/zkCli.sh -server IP:2181
+
+Stop zookeeper
+
+zkServer.sh stop stormZk.cfg
+
+Start Nimbus Daemon
+
+$STORMROOT/bin/storm nimbus
+
+Start Supervisor Daemon
+
+$STORMROOT/bin/storm supervisor
+
+Start User Interface
+
+$STORMROOT/bin/storm ui
+
+Storm User interface address
+http://localhost:8080/index.html

@@ -1,4 +1,4 @@
-package trendingTopology;
+package master2016;
 
 import java.io.IOException;
 import java.util.Map;
