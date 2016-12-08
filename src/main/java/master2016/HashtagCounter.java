@@ -54,12 +54,13 @@ public class HashtagCounter extends BaseRichBolt{
 					if (isWindowOpen[i]) {
 						// window ends
 						isWindowOpen[i] = false;
+						int numHashtags = tweetCount[i].size();
 						Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
 						while (it.hasNext()) {
 							Entry<String, Integer> pair = it.next();
-							collector.emit(new Values(windowId[i], languages[i], pair.getKey(), pair.getValue()));
+							collector.emit(new Values(windowId[i], languages[i], pair.getKey(), pair.getValue(), numHashtags));
 						}
-						collector.emit(new Values(windowId[i], "", "", 0));
+//						collector.emit(new Values(windowId[i], "", "", 0));
 						tweetCount[i].clear();
 					} else {
 						// window starts
@@ -86,7 +87,7 @@ public class HashtagCounter extends BaseRichBolt{
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) 
 	{
-		declarer.declare(new Fields("windowId", "language", "hashtag", "count"));
+		declarer.declare(new Fields("windowId", "language", "hashtag", "count", "numHashtags"));
 	}
 
 }
