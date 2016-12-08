@@ -24,11 +24,18 @@ public class SaveOutput extends BaseRichBolt{
 	private ArrayList<Tuple>[] top3List;
 	private String folder;
 	private String[] windowId;
-	private int windowCounter;
+	private int[] languagesCount;
+	private String[] languages;
 
-	public SaveOutput(String folder)
+	@SuppressWarnings("unchecked")
+	public SaveOutput(String[] languages, String folder)
 	{
 		super();
+		this.languages = languages;
+		languagesCount = new int[languages.length];
+		for (int i = 0; i < languagesCount.length; i++) {
+			languagesCount[i] = 1;
+		}
 		this.top3List = new ArrayList[3];
 		this.top3List[0] = new ArrayList<Tuple>();
 		this.top3List[1] = new ArrayList<Tuple>();
@@ -37,7 +44,6 @@ public class SaveOutput extends BaseRichBolt{
 		this.windowId[0] = "";
 		this.windowId[1] = "";
 		this.windowId[2] = "";
-		this.windowCounter = 1;
 		this.folder = folder;
 	}
 
@@ -61,8 +67,6 @@ public class SaveOutput extends BaseRichBolt{
 	{
 		String newWindowId = input.getString(0);
 		int newNumHashtags = input.getInteger(4);
-		
-		System.out.println(newNumHashtags + " " + top3List[0].size());
 
 		boolean windowExists = false;
 		for (int i = 0; i < 3; i++) {
@@ -88,7 +92,15 @@ public class SaveOutput extends BaseRichBolt{
 						}
 					});
 					// get top 3 hashtags
-					String toSave = windowCounter + "";
+					String currentLanguage = top3List[i].get(0).getString(1);
+					String toSave = "";
+					for (int j = 0; j < languages.length; j++) {
+						if (languages[j].equals(currentLanguage)) {
+							toSave += languagesCount[j];
+							languagesCount[j]++;
+						}
+					}
+					toSave += "," + currentLanguage;
 					int top3Count = 0;
 					for (int j = 0; j < top3List[i].size() && top3Count < 3; j++) {
 						Tuple currentTuple = top3List[i].get(j);
@@ -104,7 +116,6 @@ public class SaveOutput extends BaseRichBolt{
 						top3Count++;
 					}
 
-					windowCounter++;
 					// save them to file
 					System.out.println(toSave);
 					saveToFile(i, toSave);

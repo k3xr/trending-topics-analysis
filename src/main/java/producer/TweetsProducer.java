@@ -101,6 +101,11 @@ public class TweetsProducer
 				String tweetLine;
 				while ((tweetLine = reader.readLine()) != null) {
 					prod.send(new ProducerRecord<String, String>(TweetsProducer.TOPIC_NAME, tweetLine));
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 				reader.close();
 			} catch (FileNotFoundException e) {

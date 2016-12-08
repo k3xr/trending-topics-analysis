@@ -60,14 +60,12 @@ public class HashtagCounter extends BaseRichBolt{
 							Entry<String, Integer> pair = it.next();
 							collector.emit(new Values(windowId[i], languages[i], pair.getKey(), pair.getValue(), numHashtags));
 						}
-//						collector.emit(new Values(windowId[i], "", "", 0));
-						tweetCount[i].clear();
+						tweetCount[i] = new HashMap<String, Integer>();
 					} else {
 						// window starts
 						windowId[i] = timestamp;
 						isWindowOpen[i] = true;
 					}
-
 				} else if (isWindowOpen[i]) {
 					int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
 					tweetCount[i].put(hashtag, oldCount+1);		

@@ -48,13 +48,13 @@ public class TweetsFilter extends BaseRichBolt {
 		try {
 			root = objectMapper.readTree(tweet);
 			String timestamp = root.get("timestamp_ms").textValue();
-			JsonNode hashtagsNode = root.path("entities").path("hashtags");
 			String language = root.path("lang").asText();
+			JsonNode hashtagsNode = root.path("entities").path("hashtags");
 			if (checkLang(language) && !hashtagsNode.toString().equals("[]")) {
-				for (JsonNode node : hashtagsNode) {
+				for (JsonNode node : hashtagsNode) {					
 					String hashtag = node.path("text").asText();
 					collector.emit(new Values(timestamp, language, hashtag));
-				}				
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -45,7 +45,7 @@ public class Top3App {
 		builder.setBolt("hashtagCounter", new HashtagCounter(languages, topics))
 		.fieldsGrouping("tweetsFilter", new Fields("language"));
 
-		builder.setBolt("saveOutput", new SaveOutput(folder))
+		builder.setBolt("saveOutput", new SaveOutput(languages, folder))
 		.fieldsGrouping("hashtagCounter", new Fields("windowId"));
 
 		Config conf = new Config();
