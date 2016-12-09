@@ -52,21 +52,27 @@ public class HashtagCounter extends BaseRichBolt{
 			if (languages[i].equals(language)) {
 				if (topics[i].equals(hashtag)) {
 					if (isWindowOpen[i]) {
-						// window ends
-						isWindowOpen[i] = false;
+						// window restarts
 						int numHashtags = tweetCount[i].size();
-						Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
-						while (it.hasNext()) {
-							Entry<String, Integer> pair = it.next();
-							collector.emit(new Values(windowId[i], languages[i], pair.getKey(), pair.getValue(), numHashtags));
+						if(numHashtags == 0){
+							collector.emit(new Values(windowId[i]+languages[i], languages[i], "0", 0, 0));
 						}
+						else{
+							Iterator<Entry<String, Integer>> it = tweetCount[i].entrySet().iterator();
+							while (it.hasNext()) {
+								Entry<String, Integer> pair = it.next();
+								collector.emit(new Values(windowId[i]+languages[i], languages[i], pair.getKey(), pair.getValue(), numHashtags));
+							}
+						}						
 						tweetCount[i] = new HashMap<String, Integer>();
+						windowId[i] = timestamp;
 					} else {
 						// window starts
 						windowId[i] = timestamp;
 						isWindowOpen[i] = true;
 					}
-				} else if (isWindowOpen[i]) {
+				} else if (isWindowOpen[i]){
+					// Add 1 to the hashtag counter
 					int oldCount = (tweetCount[i].get(hashtag) == null) ? 0 : tweetCount[i].get(hashtag);
 					tweetCount[i].put(hashtag, oldCount+1);		
 				}

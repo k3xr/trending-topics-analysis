@@ -23,7 +23,6 @@ public class SaveOutput extends BaseRichBolt{
 	private static final long serialVersionUID = 1L;
 	private ArrayList<Tuple>[] top3List;
 	private String folder;
-	private String[] windowId;
 	private int[] languagesCount;
 	private String[] languages;
 
@@ -40,16 +39,12 @@ public class SaveOutput extends BaseRichBolt{
 		this.top3List[0] = new ArrayList<Tuple>();
 		this.top3List[1] = new ArrayList<Tuple>();
 		this.top3List[2] = new ArrayList<Tuple>();
-		this.windowId = new String[3];
-		this.windowId[0] = "";
-		this.windowId[1] = "";
-		this.windowId[2] = "";
 		this.folder = folder;
 	}
 
-	private void saveToFile(int list, String lineToSave)
+	private void saveToFile(String lineToSave, String lang)
 	{
-		File file = new File(folder + "/" + top3List[list].get(0).getString(1) + "_" + 13);
+		File file = new File(folder + "/" + lang + "_" + 13);
 		BufferedWriter writer = null;
 
 		try {
@@ -68,14 +63,52 @@ public class SaveOutput extends BaseRichBolt{
 		String newWindowId = input.getString(0);
 		int newNumHashtags = input.getInteger(4);
 
-		boolean windowExists = false;
+		if(newNumHashtags == 0){
+			String currentLanguage = input.getString(1);
+			String toSave = "";
+			for (int j = 0; j < languages.length; j++) {
+				if (languages[j].equals(currentLanguage)) {
+					toSave += languagesCount[j];
+					languagesCount[j]++;
+					break;
+				}
+			}
+			toSave += "," + currentLanguage + ",null,0,null,0,null,0";
+
+			// save to file
+			System.out.println(toSave);
+			saveToFile(toSave, currentLanguage);
+			return;
+		}
+
+		if(newNumHashtags == 1){
+			String currentLanguage = input.getString(1);
+			String toSave = "";
+			for (int j = 0; j < languages.length; j++) {
+				if (languages[j].equals(currentLanguage)) {
+					toSave += languagesCount[j];
+					languagesCount[j]++;
+					break;
+				}
+			}
+			toSave += "," + currentLanguage + "," + input.getString(2) + "," + input.getInteger(3) + 
+					",null,0,null,0";
+
+			// save to file
+			System.out.println(toSave);
+			saveToFile(toSave, currentLanguage);
+			return;
+		}
+
+		boolean windowExists = false;		
+
 		for (int i = 0; i < 3; i++) {
-			if (!windowExists && newWindowId.equals(windowId[i])) {
+			if (!windowExists && !top3List[i].isEmpty() && top3List[i].get(0).getString(0).equals(newWindowId)) {
 				windowExists = true;
 				top3List[i].add(input);
 				// check if window is complete
 				if (top3List[i].size() == newNumHashtags) {
-					// order the old collection
+					// order the collection
 					Collections.sort(top3List[i], new Comparator<Tuple>() {
 						@Override
 						public int compare(Tuple tuple1, Tuple tuple2) {
@@ -91,13 +124,15 @@ public class SaveOutput extends BaseRichBolt{
 							}
 						}
 					});
+
 					// get top 3 hashtags
-					String currentLanguage = top3List[i].get(0).getString(1);
+					String currentLanguage = input.getString(1);
 					String toSave = "";
 					for (int j = 0; j < languages.length; j++) {
 						if (languages[j].equals(currentLanguage)) {
 							toSave += languagesCount[j];
 							languagesCount[j]++;
+							break;
 						}
 					}
 					toSave += "," + currentLanguage;
@@ -118,18 +153,15 @@ public class SaveOutput extends BaseRichBolt{
 
 					// save them to file
 					System.out.println(toSave);
-					saveToFile(i, toSave);
-
-					top3List[i] = new ArrayList<Tuple>(); 
-					windowId[i] = "";
+					saveToFile(toSave, currentLanguage);
+					top3List[i] = new ArrayList<Tuple>();
 				}				
 			}
 		}
 		if (!windowExists) {
 			// creates new window
 			for (int i = 0; i < 3; i++) {
-				if (windowId[i].equals("")) {
-					windowId[i] = newWindowId;
+				if (top3List[i].isEmpty()) {
 					top3List[i].add(input);
 					break;
 				}

@@ -51,18 +51,18 @@ public class Top3App {
 		Config conf = new Config();
 		conf.setNumWorkers(3);
 
-//		try {
-//			StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
-//		} catch (AlreadyAliveException e) {
-//			e.printStackTrace();
-//		} catch (InvalidTopologyException e) {
-//			e.printStackTrace();
-//		} catch (AuthorizationException e) {
-//			e.printStackTrace();
-//		}
+		//		try {
+		//			StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
+		//		} catch (AlreadyAliveException e) {
+		//			e.printStackTrace();
+		//		} catch (InvalidTopologyException e) {
+		//			e.printStackTrace();
+		//		} catch (AuthorizationException e) {
+		//			e.printStackTrace();
+		//		}
 
-				LocalCluster cluster = new LocalCluster();
-				cluster.submitTopology(topologyName, conf, builder.createTopology());
+		LocalCluster cluster = new LocalCluster();
+		cluster.submitTopology(topologyName, conf, builder.createTopology());
 
 		//		Utils.sleep(10000);
 		//
